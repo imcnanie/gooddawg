@@ -1,5 +1,6 @@
 # gooddawg
-This library is just like the [freedog sdk](https://github.com/Bin4ry/free-dog-sdk), but 
+Move your Unitree Go1 dog legs- without the dog  
+
 ![Gif of the robot leg moving in a straight line](ik_leg.gif)
 
 # Wiring

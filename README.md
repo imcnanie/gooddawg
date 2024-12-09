@@ -12,6 +12,22 @@ Move your Unitree Go1 dog legs- without the dog
 - hook up the RS485 adapter and power (23-25v, low voltage may cause a brownout)
 - run sudo ./example_cartesian_arm.py, the leg should move in a straight-ish line. 
 
+# Code example
+```python
+import build_a_packet as bp
+
+ser = bp.configure_serial("/dev/ttyUSB0") # connect to your U2D2
+
+# you may send angles with q, velocities with dq, or feedforward torque with tau
+# set Kp to 0 for velocity mode
+# set Kp, Kd to 0 and send torques with tau
+bp.send_packet(ser, bp.build_a_packet(id=1, q=q, dq=dq, Kp=4, Kd=0.3, tau=0.0))
+bp.read_and_update_motor_data(ser) # read back some feedback data
+
+time.sleep(0.01) # don't send too fast or you'll saturate the bus
+print(bp.motor_data) # print angles and angular velocities
+```
+
 # special thanks/previous work
 - [AATB for decoding the CRC on Go1 and Go2](https://github.com/aatb-ch/unitree_crc)
 - [benrg for finding the initial CRC polynomial](https://crypto.stackexchange.com/questions/113287/do-i-have-any-hope-of-decoding-this-crc/113310#113310)

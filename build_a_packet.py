@@ -59,12 +59,10 @@ def vel_to_hex(key):
     # Return combined string
     return f"{hex_value}{sign}"
 """
-def pos_to_hex(number, gear_reduction):
+def pos_to_hex(number):
     # Convert to 16-bit value
-    if number >= 0:
-        value = int((number/(gear_reduction*0.75))*65000+65536) & 0xFFFF # Reduce gear ratio by 5% for positive numbers
-    else:
-        value = int((number/gear_reduction)*65000+65536) & 0xFFFF
+
+    value = int((number)*65000+65536) & 0xFFFF
     # Determine sign based on number
     sign = "ffff" if number < 0 else "0000"
     # Get low and high bytes
@@ -104,9 +102,9 @@ def build_a_packet(id, q, dq, Kp, Kd, tau):
     torque = torque_to_hex(int(tau*100000)) # xxxx
     vel = vel_to_hex(dq) # xxxx
     if id == 2:
-        position = pos_to_hex(q, 8.0) # position-> xxxx xxxx <- sign (0000 or ffff)
+        position = pos_to_hex(0.379897*q + -0.120322) # position-> xxxx xxxx <- sign (0000 or ffff)
     else:
-        position = pos_to_hex(q, 5) # position-> xxxx xxxx <- sign (0000 or ffff)
+        position = pos_to_hex(-0.235337*q + 0.459373-0.03) # position-> xxxx xxxx <- sign (0000 or ffff)
     kp = p_to_hex(int(Kp)) # xx
     reserved2 = "00" # this might be more kp precision! seems to make motor go crazy
     kd = d_to_hex(Kd) # xx
@@ -180,11 +178,12 @@ def read_and_update_motor_data(ser):
             motor_data["mot0_angle"] = float(interpret_signed_angle(response[60:68]))
             motor_data["mot0_velocity"] = interpret_signed_angle_2byte(response[28:32])/10000.0 
         if response.startswith("feee01010a00"):
-            angle = -float(interpret_signed_angle(response[60:68]))
-            motor_data["mot1_angle"] = angle * 1.2 if angle < 0 else angle * 1.1
+            angle = float(interpret_signed_angle(response[60:68]))
+            motor_data["mot1_angle"] = (angle - -1.539519) / 0.793123
             motor_data["mot1_velocity"] = interpret_signed_angle_2byte(response[28:32])/10000.0 
         if response.startswith("feee02010a00"):
-            motor_data["mot2_angle"] = float(interpret_signed_angle(response[60:68]))
+            angle = float(interpret_signed_angle(response[60:68]))
+            motor_data["mot2_angle"] = (angle - 0.378445) / -1.219688 
             motor_data["mot2_velocity"] = interpret_signed_angle_2byte(response[28:32])/10000.0 
 
     except (ValueError, TypeError) as e:

@@ -7,8 +7,8 @@ import time
 import math
 import build_a_packet as bp
 
-l1 = 0.21
-l2 = 0.21
+l1 = 0.215
+l2 = 0.215
 
 def get_ik(x, y, L1=l1, L2=l2):
     """
@@ -110,8 +110,10 @@ diff2 = 0.0
 if __name__ == "__main__":
     ser = bp.configure_serial("/dev/ttyUSB0")
     while True:
-        q = math.sin(time.time())*0.1 # Sine wave oscillating between -150 and +150
-        dq = math.cos(time.time())*0.01
+        qy = math.sin(time.time())*0.05 # Sine wave oscillating between -150 and +150
+        qx = math.cos(time.time())*0.05 # Sine wave oscillating between -150 and +150
+        dqy = math.cos(time.time())*0.01
+        dqx = -math.sin(time.time())*0.01 # Sine wave oscillating between -150 and +150
 
         # these are good gains to balance vel pos, and feed forward tau of 0.3 seems to comp grav
         # bp.send_packet(ser, bp.build_a_packet(id=1, q=q, dq=0.02, Kp=3, Kd=0.5, tau=0.0))
@@ -119,17 +121,17 @@ if __name__ == "__main__":
         #bp.send_packet(ser, bp.build_a_packet(id=0, q=0.0, dq=0, Kp=3, Kd=0.5, tau=0.0)) # to do velocity mode we make p 0, tau is how torqy, KD is vel
         #time.sleep(0.005)  # Small delay to control update rate
 
-        q1, q2 = get_ik(0.15,0.25+q)
+        q1, q2 = get_ik(0.15+qx,0.3+qy)
         #print(q1,q2)
 
         # TODO jacobian has a problem on the y axis
-        dq1, dq2 = get_joint_velocities(0, 0, q1, q2)
+        dq1, dq2 = get_joint_velocities(dqx, dqy, q1, q2)
         #print(dq1, dq2)
 
         t1 = q1
 
         # If you are brave, set Kp to 24
-        bp.send_packet(ser, bp.build_a_packet(id=1, q=q1, dq=-dq1, Kp=8, Kd=0.04, tau=0.00)) # to do velocity mode we make p 0, tau is how torqy, KD is vel
+        bp.send_packet(ser, bp.build_a_packet(id=1, q=q1, dq=-dq1, Kp=39, Kd=0.8, tau=0.0))# -diff1*1.0)) #)) # to do velocity mode we make p 0, tau is how torqy, KD is vel
        
 
         bp.read_and_update_motor_data(ser)
@@ -139,13 +141,13 @@ if __name__ == "__main__":
 
         #26 0.5
         # 36 0.7
-        bp.send_packet(ser, bp.build_a_packet(id=2, q=q2, dq=dq2, Kp=4, Kd=0.02, tau=0.0)) # to do velocity mode we make p 0, tau is how torqy, KD is vel
+        bp.send_packet(ser, bp.build_a_packet(id=2, q=q2, dq=dq2, Kp=30, Kd=0.5, tau=0.0))  #+diff2*2.5)) # to do velocity mode we make p 0, tau is how torqy, KD is vel
 
         bp.read_and_update_motor_data(ser)
         time.sleep(0.008)
         if bp.motor_data['mot1_angle'] is not None and bp.motor_data['mot2_angle'] is not None:
-            diff1 = bp.motor_data['mot1_angle']
-            diff2 = bp.motor_data['mot2_angle']
+            diff1 = q1-bp.motor_data['mot1_angle']
+            diff2 = q2-bp.motor_data['mot2_angle']
             #print(f"error1: {diff1:.3f}, error2: {diff2:.3f}")
         else:
             print("Waiting for motor data...")

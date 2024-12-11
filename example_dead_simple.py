@@ -15,11 +15,11 @@ if __name__ == "__main__":
         dq = math.cos(time.time())*0.09
 
 
-        bp.send_packet(ser, bp.build_a_packet(id=1, q=q, dq=dq, Kp=4, Kd=0.3, tau=0.0)) # to do velocity mode we make p 0, tau is how torqy, KD is vel
+        bp.send_packet(ser, bp.build_a_packet(id=1, q=q, dq=dq, Kp=4, Kd=0.3, tau=0.0)) # to do velocity mode we make p 0, dq is vel, tau is feedforward
         bp.read_and_update_motor_data(ser)
         time.sleep(0.01)
 
-        bp.send_packet(ser, bp.build_a_packet(id=2, q=q, dq=dq, Kp=4, Kd=0.3, tau=0.0)) # to do velocity mode we make p 0, tau is how torqy, KD is vel
+        bp.send_packet(ser, bp.build_a_packet(id=2, q=q, dq=dq, Kp=4, Kd=0.3, tau=0.0)) # to do velocity mode we make p 0, dq is vel, tau is feedforward
         bp.read_and_update_motor_data(ser)
         time.sleep(0.01)
 

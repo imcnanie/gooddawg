@@ -5,13 +5,15 @@ import struct
 import serial
 import time
 import math
+import sys
+sys.path.append("..")
 import build_a_packet as bp
 
-MOTOR_ID = 2
+MOTOR_ID = 0
 
 if __name__ == "__main__":
     ser = bp.configure_serial("/dev/ttyUSB0")
-    cnt = 20 # -50 for mot 1
+    cnt = -50 # -50 for mot 1
     LUT = {}
     while True:
 
@@ -22,7 +24,8 @@ if __name__ == "__main__":
         print(q1)
 
 
-        bp.send_packet(ser, bp.build_a_packet(id=MOTOR_ID, q=q1, dq=0, Kp=4, Kd=0.0, tau=0.00)) # to do velocity mode we make p 0, tau is how torqy, KD is vel
+        # you need to up these pids from 2->24 so it actaully goes to an accurate angle, this can be dangerous
+        bp.send_packet(ser, bp.build_a_packet(id=MOTOR_ID, q=q1, dq=0, Kp=3, Kd=0.0, tau=0.00)) # to do velocity mode we make p 0, tau is how torqy, KD is vel
        
         bp.read_and_update_motor_data(ser)
         time.sleep(0.01)

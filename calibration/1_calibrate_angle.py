@@ -5,15 +5,18 @@ import struct
 import serial
 import time
 import math
+import sys
+sys.path.append("..")
 import build_a_packet as bp
 
-MOTOR_ID = 2
+MOTOR_ID = 0
 if __name__ == "__main__":
     ser = bp.configure_serial("/dev/ttyUSB0")
     #calibration_angles = [0, math.pi/2, math.pi]  # link 1
-    presets= [[0, math.pi/2, math.pi], 
+    presets= [[0, math.pi/2, math.pi],
+              [0, math.pi/2, math.pi], 
               [50*math.pi/180, math.pi/2, 150*math.pi/180]]  # link 2
-    calibration_angles = presets[MOTOR_ID-1]
+    calibration_angles = presets[MOTOR_ID]
     measured_angles = []
     
     for target_angle in calibration_angles:

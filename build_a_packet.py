@@ -103,6 +103,8 @@ def build_a_packet(id, q, dq, Kp, Kd, tau):
     vel = vel_to_hex(dq) # xxxx
     if id == 2:
         position = pos_to_hex(0.379897*q + -0.120322) # position-> xxxx xxxx <- sign (0000 or ffff)
+    elif id == 0:
+        position = pos_to_hex(-0.242287*q + 0.131417) # get this from 2_calibrate_motor.py and 3_linear_fit_from_LUT.py
     else:
         position = pos_to_hex(-0.235337*q + 0.459373-0.03) # position-> xxxx xxxx <- sign (0000 or ffff)
     kp = p_to_hex(int(Kp)) # xx
@@ -175,7 +177,8 @@ def read_and_update_motor_data(ser):
 
     try:
         if response.startswith("feee00010a00"):
-            motor_data["mot0_angle"] = float(interpret_signed_angle(response[60:68]))
+            angle = float(interpret_signed_angle(response[60:68]))
+            motor_data["mot0_angle"] = (angle - -0.426988) / 0.786139 #(angle - -0.485852) / 0.799642 # to get this calibration, run 1_calibrate_angle.py
             motor_data["mot0_velocity"] = interpret_signed_angle_2byte(response[28:32])/10000.0 
         if response.startswith("feee01010a00"):
             angle = float(interpret_signed_angle(response[60:68]))
